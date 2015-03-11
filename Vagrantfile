@@ -31,7 +31,7 @@ systemctl start network.service
 #
 
 # packstack
-yum install -y https://rdo.fedorapeople.org/rdo-release.rpm
+yum install -y https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm
 
 # Midonet
 cat >> /etc/yum.repos.d/midonet.repo << EOF_MIDO
