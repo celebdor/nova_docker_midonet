@@ -12,6 +12,16 @@ Vagrant.configure(2) do |config|
 #
 systemctl mask NetworkManager
 systemctl stop NetworkManager
+cat > /etc/sysconfig/network-scripts/ifcfg-enp0s8 << MIDO_EOF
+DEVICE=enp0s8
+BOOTPROTO=dhcp
+NM_CONTROLLED=no
+MIDO_EOF
+cat > /etc/sysconfig/network-scripts/ifcfg-enp0s9 << MIDO_EOF
+DEVICE=enp0s9
+BOOTPROTO=dhcp
+NM_CONTROLLED=no
+MIDO_EOF
 systemctl enable network.service
 systemctl start network.service
 
@@ -25,16 +35,16 @@ yum install -y https://rdo.fedorapeople.org/rdo-release.rpm
 
 # Midonet
 cat >> /etc/yum.repos.d/midonet.repo << EOF_MIDO
-[midonet] 
+[midonet]
 name=MidoNet
-baseurl=http://repo.midonet.org/midonet/v2014.11/RHEL/7/unstable/
+baseurl=http://repo.midonet.org/midonet/v2015.01/RHEL/7/stable/
 enabled=1
 gpgcheck=1
 gpgkey=http://repo.midonet.org/RPM-GPG-KEY-midokura
 
 [midonet-openstack-integration]
 name=MidoNet OpenStack Integration
-baseurl=http://repo.midonet.org/openstack-juno/RHEL/7/unstable/
+baseurl=http://repo.midonet.org/openstack-juno/RHEL/7/testing/
 enabled=1
 gpgcheck=1
 gpgkey=http://repo.midonet.org/RPM-GPG-KEY-midokura
@@ -64,7 +74,7 @@ EOF_MIDO
 yum update -y
 
 # Tools
-yum install -y augeas crudini screen 
+yum install -y augeas crudini screen
 
 
 #
@@ -86,7 +96,7 @@ packstack --install-hosts=$IP \
 rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
 
 #
-# Disable uneeded remaining services
+# Disable unneeded remaining services
 #
 yum remove -y openstack-neutron-openvswitch
 systemctl stop openvswitch
@@ -111,12 +121,12 @@ yum install -y java-1.7.0-openjdk-headless zookeeper
 
 # Zookeeper expects the JRE to be found in the /usr/java/default/bin/ directory
 # so if it is in a different location, you must create a symbolic link pointing
-# to that location. To do so run the 2 following commands: 
+# to that location. To do so run the 2 following commands:
 
 mkdir -p /usr/java/default/bin/
 ln -s /usr/lib/jvm/jre-1.7.0-openjdk/bin/java /usr/java/default/bin/java
 
-# Next we need to create the zookeeper data directory and assign permissions: 
+# Next we need to create the zookeeper data directory and assign permissions:
 
 mkdir /var/lib/zookeeper/data
 chmod 777 /var/lib/zookeeper/data
@@ -125,11 +135,11 @@ chmod 777 /var/lib/zookeeper/data
 # (in a prod installation you would have more than one zookeeper server in a
 # cluster. For this example we are only using one. ). Edit the Zookeeper config
 # file at /etc/zookeeper/zoo.cfg and add the following to the bottom of the
-# file: 
+# file:
 
 echo "server.1=$IP:2888:3888" >> /etc/zookeeper/zoo.cfg
 
-# We need to set the Zookeeper ID on this server: 
+# We need to set the Zookeeper ID on this server:
 
 echo 1 > /var/lib/zookeeper/data/myid
 
@@ -139,7 +149,7 @@ systemctl start zookeeper.service
 #
 # Cassandra
 #
- 
+
 yum install -y dsc20
 
 sed -i -e "s/cluster_name:.*/cluster_name: 'midonet'/" /etc/cassandra/conf/cassandra.yaml
@@ -291,7 +301,7 @@ ln -s /etc/neutron/plugins/midonet/midonet.ini /etc/neutron/plugin.ini
 # Comment out the service_plugins definitions
 crudini --set /etc/neutron/neutron.conf DEFAULT service_plugins neutron.services.firewall.fwaas_plugin.FirewallPlugin
 sed -i -e 's/^router_scheduler_driver/#router_scheduler_driver/' /etc/neutron/neutron.conf
- 
+
 # dhcp agent config
 crudini --set /etc/neutron/dhcp_agent.ini DEFAULT interface_driver neutron.agent.linux.interface.MidonetInterfaceDriver
 crudini --set /etc/neutron/dhcp_agent.ini DEFAULT dhcp_driver midonet.neutron.agent.midonet_driver.DhcpNoOpDriver
@@ -314,10 +324,10 @@ neutron subnet-create foo 172.16.1.0/24 --name foo
 
 function install_nova_docker_with_midonet() {
     yum install -y git python-pip
-    git clone https://review.openstack.org/stackforge/nova-docker 
+    git clone https://review.openstack.org/stackforge/nova-docker
     pushd nova-docker
     git checkout origin/stable/juno
-    git fetch https://review.openstack.org/stackforge/nova-docker refs/changes/53/146553/3 && git cherry-pick FETCH_HEAD
+    git cherry-pick 9d13645e627897517d01d10a005c4dd3435e6638
     pip install pbr
     python setup.py install --record /root/nova_docker_installed_files.txt
     mkdir -p /etc/nova/rootwrap.d
@@ -347,7 +357,7 @@ gpasswd -a nova docker
 systemctl enable docker
 systemctl start docker
 
-configure_glance_for_docker   
+configure_glance_for_docker
 
 # Add docker's cirros to glance
 docker pull cirros
