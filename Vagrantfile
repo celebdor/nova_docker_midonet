@@ -32,6 +32,7 @@ systemctl start network.service
 
 # packstack
 yum install -y https://repos.fedorapeople.org/repos/openstack/openstack-juno/rdo-release-juno-1.noarch.rpm
+yum install -y epel-release
 
 # Midonet
 cat >> /etc/yum.repos.d/midonet.repo << EOF_MIDO
