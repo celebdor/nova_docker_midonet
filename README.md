@@ -29,7 +29,7 @@ network called foo.
 To learn more about midonet, you can head over to
 * [midonet](http://midonet.org/)
 
-* join us at #midonet @ freenode
+* join us at https://slack.midonet.org
 
 * write to http://lists.midonet.org/listinfo/midonet-user
 
