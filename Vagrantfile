@@ -83,6 +83,7 @@ yum install -y augeas crudini screen
 #
 
 IP=192.168.124.185
+yum install -y python-oslo-utils
 yum install -y openstack-packstack
 packstack --install-hosts=$IP \
  --nagios-install=n \
