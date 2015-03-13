@@ -328,7 +328,7 @@ function install_nova_docker_with_midonet() {
     git clone https://review.openstack.org/stackforge/nova-docker
     pushd nova-docker
     git checkout origin/stable/juno
-    git cherry-pick 9d13645e627897517d01d10a005c4dd3435e6638
+    git cherry-pick 06dabc0aecf95003e2558da3899ceed43367c237
     pip install pbr
     python setup.py install --record /root/nova_docker_installed_files.txt
     mkdir -p /etc/nova/rootwrap.d
